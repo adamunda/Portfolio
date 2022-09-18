@@ -1,7 +1,6 @@
-# Adamu Nda
-Data Analyst 
+# Data Analyst 
 
-#Project 1: Data Exploration
+# Project 1: Data Exploration
 *Skills displayed: 
 	•	Joins, 
 	•	CTE's, 
@@ -11,7 +10,7 @@ Data Analyst
 	•	Creating Views, 
 	•	Converting Data Types.
   
- #Project 2: Covid 19 - Tableau Visualization
+ # Project 2: Covid 19 - Tableau Visualization
 A visualization of queried Covid data using graphs, map, table and line chart.
 
 ![](/Images/Tableau%20Project%20Image.jpg)
