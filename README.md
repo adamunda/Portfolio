@@ -1,5 +1,5 @@
 # Adamu Nda
-# Data Analyst 
+Data Analyst 
 
 #Project 1: Data Exploration
 *Skills displayed: 
