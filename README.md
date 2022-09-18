@@ -15,7 +15,7 @@ A visualization of queried Covid data using graphs, map, table and line chart.
 
 ![](/Images/Tableau%20Project%20Image.jpg)
 
-#Project 3: Data Cleaning
+# Project 3: Data Cleaning
 *In this project, I used Nashville housing data to show my data cleaning skills using MySQL.
 
 
