@@ -12,7 +12,7 @@ Skills Used:
 - Converting Data Types.
   
   
-## [Project 2: Tableau Visualization]([)](https://public.tableau.com/app/profile/adamu.nda/viz/CovidDashboard_16631493077150/Dashboard1?publish=yes)
+## [Project 2: Tableau Visualization](https://public.tableau.com/app/profile/adamu.nda/viz/CovidDashboard_16631493077150/Dashboard1?publish=yes)
 A visualization of queried Covid data using 
 - Graphs,
 - Map, 
