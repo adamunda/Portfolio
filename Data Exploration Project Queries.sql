@@ -1,90 +1,103 @@
+/*
+
+Covid 19 Data Exploration
+
+Skills used: Joins, CTE's, Temp Tables, Windows Functions, Aggregate Functions, Creating Views, Converting Data Types
+
+*/
+
+
+-- Select Data to start with
 SELECT location, date, total_cases, new_cases, total_deaths, population
 FROM CovidProject.covid_deaths
-order by 1,2;
+WHERE continent != ''
+ORDER BY 1,2;
 
 
-#Total Cases vs Total Deaths
-SELECT location, date, population, total_cases, total_deaths, (total_deaths/total_cases) * 100 as death_percentage,
-(total_cases/population) * 100 as population_percentage
+-- Total Cases vs Total Deaths
+-- Shows likilihood of dying if you contract covid in a country
+
+SELECT location, date, population, total_cases, total_deaths, (total_deaths/total_cases) * 100 as death_percentage
 FROM CovidProject.covid_deaths
-WHERE location = 'Aruba'
-order by total_cases desc; 
+WHERE location = 'Canada' AND continent != ''
+ORDER BY 1,2;
 
-#Total Cases vs Population
-#Shows percentage of population that got Covid
-SELECT location, date, population, total_cases, (total_cases/population) * 100 as population_percentage
+
+-- Total Cases vs Population
+-- Shows percentage of population that got Covid
+
+SELECT location, date, population, total_cases, (total_cases/population) * 100 as percentage_infected
 FROM CovidProject.covid_deaths
-WHERE location = 'Canada'
-order by 1,2; 
+ORDER BY 1,2;
 
-#Countries with highest infection rate compared to population
-SELECT location, population, date, Max(total_cases) as highest_infection_count, 
-Max((total_cases/population)) * 100 as perc_pop_infected
+
+-- Countries with highest infection rate compared to population
+
+SELECT location, population, Max(total_cases) as highest_infection_count, Max((total_cases/population)) * 100 as percentage_infected
 FROM CovidProject.covid_deaths
-#WHERE (Max((total_cases/population)) * 100) is null
-GROUP by location, population, date
-order by perc_pop_infected desc;
+GROUP BY location, population
+ORDER BY percentage_infected desc;
 
-#Countries with highest death count per population
-SELECT location, Max(cast(total_deaths as SIGNED)) as death_count
+
+-- Countries with highest death count per population
+
+SELECT location, Max(cast(total_deaths as SIGNED)) as total_death_count
 FROM CovidProject.covid_deaths
 WHERE continent != ''
-GROUP by location
-order by death_count desc;
+GROUP BY location
+ORDER BY total_death_count desc;
 
-#Showing continent with the highest death count
-SELECT continent, Max(cast(total_deaths as SIGNED)) as death_count
-FROM CovidProject.covid_deaths
-#WHERE continent != ''
-GROUP by continent
-order by death_count desc;
 
-#Sh
-SELECT SUM(new_cases) as total_cases, SUM(new_deaths) as total_deaths, 
-(SUM(new_deaths)/SUM(new_cases)) * 100 AS death_percentage
+-- Showing continents with the highest death count per population
+
+SELECT continent, Max(cast(total_deaths as UNSIGNED)) as total_death_count
 FROM CovidProject.covid_deaths
 WHERE continent != ''
-#GROUP by date 
-order by 1,2;
+GROUP BY continent
+ORDER BY total_death_count desc;
 
-##
-SELECT location, SUM(new_deaths) as total_deaths
+
+-- Global Numbers
+
+SELECT SUM(new_cases) as total_cases, SUM(new_deaths) as total_deaths, (SUM(new_deaths)/SUM(new_cases)) * 100 AS death_percentage
 FROM CovidProject.covid_deaths
-WHERE continent = ''
-AND location in ('Africa', 'Asia', 'Europe', 'North America', 'Oceania', 'South America')
-GROUP by location
-order by 2 desc;
+WHERE continent != ''
+ORDER BY 1,2;
 
 
-#Total Population vs Vaccinations
+-- Total population VS Vaccinated
+-- Shows percentage of population that has received at least one Covid Vaccine
+
 SELECT vacc.continent, vacc.location, vacc.date, vacc.population, vacc.new_vaccinations,
-SUM(vacc.new_vaccinations) OVER (partition by vacc.location order by vacc.location, vacc.date)
-AS rolling_vaccinated
+SUM(vacc.new_vaccinations) OVER (PARTITION BY vacc.location order by vacc.location, vacc.date) AS rolling_vaccinated
 FROM CovidProject.covid_deaths deaths
 JOIN CovidProject.covid_vaccinations vacc
-ON deaths.location = vacc.location
-and deaths.date = vacc.date
+	ON deaths.location = vacc.location
+	AND deaths.date = vacc.date
 WHERE vacc.continent != ''
-ORDER by 2,3;
+ORDER BY 2,3;
 
-#Use CTE
-WITH popVsVacc(continet, location, date, population, new_vaccinations, rolling_vaccinated)
-as
+
+-- Using CTE to perform calculation on PARTITION BY in previous query
+
+WITH pop_vs_vacc(continet, location, date, population, new_vaccinations, rolling_vaccinated)
+AS
 (SELECT vacc.continent, vacc.location, vacc.date, vacc.population, vacc.new_vaccinations,
-SUM(vacc.new_vaccinations) OVER (partition by vacc.location order by vacc.location, vacc.date)
+SUM(vacc.new_vaccinations) OVER (PARTITION BY vacc.location order by vacc.location, vacc.date)
 AS rolling_vaccinated
 FROM CovidProject.covid_deaths deaths
 JOIN CovidProject.covid_vaccinations vacc
 ON deaths.location = vacc.location
 and deaths.date = vacc.date
 WHERE vacc.continent != ''
-ORDER by 2,3
+#ORDER BY 2,3
 )
 SELECT *, (rolling_vaccinated/population) * 100 as rolling_percentage
-FROM popVsVacc;
+FROM pop_vs_vacc;
 
 
-#TEMP TABLE
+-- Using temp table to perform calculation on PARTITION BY in previous query
+
 DROP TABLE IF EXISTS percentage_vaccinated;
 CREATE TABLE percentage_vaccinated
 (
@@ -98,23 +111,22 @@ rolling_vaccinated numeric
 
 INSERT INTO percentage_vaccinated
 SELECT vacc.continent, vacc.location, vacc.date, vacc.population, vacc.new_vaccinations,
-SUM(vacc.new_vaccinations) OVER (partition by vacc.location order by vacc.location, vacc.date)
-AS rolling_vaccinated
+SUM(vacc.new_vaccinations) OVER (PARTITION BY vacc.location order by vacc.location, vacc.date) AS rolling_vaccinated
 FROM CovidProject.covid_deaths deaths
 JOIN CovidProject.covid_vaccinations vacc
-ON deaths.location = vacc.location
-and deaths.date = vacc.date
-WHERE vacc.continent != ''
-ORDER by 2,3;
+	ON deaths.location = vacc.location
+	AND deaths.date = vacc.date
+WHERE vacc.continent != '';
+#ORDER BY 2,3;
 
 
-#VIEW
-CREATE VIEW percentage_vaccinatedView AS
+-- Creating a view to store data for visualizations
+
+CREATE VIEW percentage_vaccinated_view AS
 SELECT vacc.continent, vacc.location, vacc.date, vacc.population, vacc.new_vaccinations,
-SUM(vacc.new_vaccinations) OVER (partition by vacc.location order by vacc.location, vacc.date)
-AS rolling_vaccinated
+SUM(vacc.new_vaccinations) OVER (partition by vacc.location order by vacc.location, vacc.date) AS rolling_vaccinated
 FROM CovidProject.covid_deaths deaths
 JOIN CovidProject.covid_vaccinations vacc
-ON deaths.location = vacc.location
-and deaths.date = vacc.date
+	ON deaths.location = vacc.location
+	AND deaths.date = vacc.date
 WHERE vacc.continent != '';
