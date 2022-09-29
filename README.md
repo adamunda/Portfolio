@@ -19,7 +19,7 @@ A visualization of queried Covid data using
 - Table and 
 - Line chart.
 
-![](/Images/Tableau%20Project%20Image.jpg)
+![](/Images/Tableau%20Project%20Image.png)
 
 ## [Project 3: Data Cleaning](https://github.com/adamunda/Portfolio/blob/main/Data%20Cleaning%20Project%20Queries.sql)
 In this project, I used Nashville housing data to show my data cleaning skills using MySQL.
