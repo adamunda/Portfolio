@@ -29,7 +29,7 @@ Skills used:
 - Aggregate Functions, 
 - Case, Substring Functions, 
 - Alter, 
-- Update.
+- And Update.
 
 
 
